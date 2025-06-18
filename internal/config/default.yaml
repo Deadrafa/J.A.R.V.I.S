@@ -3,4 +3,9 @@
 # Порт HTTP-сервера
 port: 8080
 host: 127.0.0.1
-token: "7825696600:AAG4NCDrZelJH5kh6o_T9ns16HdOnAvxtUs"
+telegrem_token: "7825696600:AAG4NCDrZelJH5kh6o_T9ns16HdOnAvxtUs"
+gigachat_url: "http://0.0.0.0:8000/v1/chat/completions"
+gigachat_token: "ZTIxNzM3NDktZjAxOC00YWQyLWJiOWEtNzc0Mjc4YmY1MzBlOmNiMzc5YTAxLTgwODMtNDAzNC04MWVkLWY2OGMwZmMxZDdlYg=="
+bearer: "secret123"
+model: "GigaChat"
+role: "user"

@@ -2,10 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 
-	"github.com/Deadrafa/J.A.R.V.I.S/internal/bot"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/config"
+	"github.com/Deadrafa/J.A.R.V.I.S/internal/handlers"
+	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/ai"
+	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/audio"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func main() {
@@ -17,13 +21,40 @@ func main() {
 		log.Fatalf("Ошибка загрузки конфига: %v", err)
 	}
 
-	botHandler, err := bot.NewBotHandler(cfg.Token)
+	bot, err := tgbotapi.NewBotAPI(cfg.TelegramToken)
 	if err != nil {
-		log.Fatalf("Ошибка инициализации бота: %v", err)
+		log.Fatalf("Ошибка создание бота : %v", err)
 	}
 
-	log.Println("Бот успешно запущен!")
+	downloader := &audio.TelegramAudioDownloader{Bot: bot}
+	recognizer := &audio.SpeechRecognitionService{}
+	gigaService := &ai.GigaChatService{
+		BaseURL: cfg.GigaChatURL,
+		Token:   cfg.GigaChatToken,
+		Model:   cfg.Model,
+		Role:    cfg.Role,
+	}
 
-	botHandler.Start()
+	audioHandler := &handlers.AudioHandler{
+		Bot:         bot,
+		Downloader:  downloader,
+		Recognizer:  recognizer,
+		GigaService: *gigaService,
+	}
 
+	fmt.Println("Бот запущен")
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	updates := audioHandler.Bot.GetUpdatesChan(u)
+
+	for update := range updates {
+		if update.Message == nil {
+			continue
+		}
+
+		if update.Message.Voice != nil {
+			audioHandler.HandleAudio(update.Message, update.Message.Voice.FileID)
+		}
+
+	}
 }

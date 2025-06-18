@@ -5,9 +5,14 @@ import (
 )
 
 type Config struct {
-	Host  string `yaml:"host"`
-	Port  string `yaml:"port"`
-	Token string `yaml:"token"`
+	Host          string `yaml:"host"`
+	Port          string `yaml:"port"`
+	TelegramToken string `yaml:"telegrem_token"`
+	GigaChatURL   string `yaml:"gigachat_url"`
+	GigaChatToken string `yaml:"gigachat_token"`
+	Bearer        string `yaml:"bearer"`
+	Model         string `yaml:"model"`
+	Role          string `yaml:"role"`
 }
 
 func NewConfig(filename string) (*Config, error) {
