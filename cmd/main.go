@@ -8,6 +8,7 @@ import (
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/config"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/handlers"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/ai"
+	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/ai/instructions"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/audio"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -26,6 +27,10 @@ func main() {
 		log.Fatalf("Ошибка создание бота : %v", err)
 	}
 
+	dataset, err := instructions.UnloadingDataset("internal/services/ai/instructions/event_operations.txt")
+	if err != nil {
+		log.Fatalf("Ошибка загрузки dataset: %v", err)
+	}
 	downloader := &audio.TelegramAudioDownloader{Bot: bot}
 	recognizer := &audio.SpeechRecognitionService{}
 	gigaService := &ai.GigaChatService{
@@ -33,6 +38,8 @@ func main() {
 		Token:   cfg.GigaChatToken,
 		Model:   cfg.Model,
 		Role:    cfg.Role,
+		Bearer:  cfg.Bearer,
+		Dataset: dataset,
 	}
 
 	audioHandler := &handlers.AudioHandler{

@@ -15,12 +15,16 @@ type GigaChatService struct {
 	Token   string
 	Model   string
 	Role    string
+	Bearer  string
+	Dataset string
 }
 
 func (s *GigaChatService) SendRequest(text string) error {
-	requestBody := models.GigChatResp{
+
+	requestBody := models.GigChatReq{
 		Model: s.Model,
 		Mes: []models.Messages{
+			{Role: "system", Content: s.Dataset},
 			{Role: s.Role, Content: text},
 		},
 		Temperature: 1,
@@ -39,7 +43,7 @@ func (s *GigaChatService) SendRequest(text string) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer secret123")
+	req.Header.Set("Authorization", "Bearer "+s.Bearer)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -56,7 +60,12 @@ func (s *GigaChatService) SendRequest(text string) error {
 	}
 
 	fmt.Println("Status Code:", resp.Status)
-	fmt.Println("Response Body:", string(body))
+	var jsonResp models.GigChatResp
+	err = json.Unmarshal(body, &jsonResp)
+	if err != nil {
+		return fmt.Errorf("error Marshal JSON: %w", err)
+	}
+	fmt.Println(jsonResp.Choices)
 	return nil
 
 }
