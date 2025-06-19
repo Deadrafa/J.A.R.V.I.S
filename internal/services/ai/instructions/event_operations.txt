@@ -5,27 +5,32 @@ instruction
 1. Все ответы ТОЛЬКО в JSON-формате
 2. Для временных меток использовать RFC3339 (+07:00 для Новосибирска)
 3. При отсутствии данных возвращать null
+4. Событие не должно быть позже сегодняшней даты
 
 ## Схемы запросов:
 
-### 1. Добавление события (add_event)
-json
+### 1. Добавление события (POST /events)
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["comment", "location", "start_date"],
+  "required": ["action_status", "comment", "start_date"],
   "properties": {
+    "action_status": {
+      "type": "string",
+      "enum": ["add", "delete"]
+    },
     "comment": {
       "type": "string",
       "maxLength": 120,
-      "description": "Краткое название события"
+      "example": "Совещание по проекту"
     },
     "location": {
       "type": "string",
-      "description": "Место проведения"
+      "default": "Офис по умолчанию",
+      "example": "Конференц-зал 3"
     },
     "description": {
-      "type": "string",
+      "type": ["string", "null"],
       "maxLength": 500,
       "default": null
     },
@@ -35,7 +40,7 @@ json
         "date_time": {
           "type": "string",
           "format": "date-time",
-          "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+07:00"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+07:00$"
         },
         "time_zone": {
           "type": "string",
@@ -58,15 +63,17 @@ json
     }
   }
 }
-```
 
-### 2. Удаление события (delete_event)
-json
+### 2. Удаление события (DELETE /events)
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["start_date"],
+  "required": ["action_status", "start_date"],
   "properties": {
+    "action_status": {
+      "type": "string",
+      "const": "delete"
+    },
     "start_date": {
       "type": "object",
       "properties": {
@@ -93,9 +100,10 @@ json
    - Если продолжительность не указана → end_date = start_date + 1 час
    - Если location не указан → "Офис по умолчанию"
    - Если description отсутствует → null
+   - Если год не указан → time.Now().Year()
 
 3. Ошибки:
-json
+
 {
   "error": {
     "code": "VALIDATION_ERROR",
@@ -111,8 +119,9 @@ json
 
 Пользователь: "Запланируй совещание на завтра в 15:30 на 2 часа"
 Ответ:
-json
+
 {
+  "action_status": "add",
   "comment": "Совещание по проекту",
   "location": "Офис по умолчанию",
   "description": null,
@@ -129,8 +138,8 @@ json
 
 Пользователь: "Отмени встречу в 14:00 15 июня"
 Ответ:
-json
 {
+  "action_status": "delete",
   "start_date": {
     "date_time": "2025-06-15T14:00:00+07:00",
     "time_zone": "Asia/Novosibirsk"

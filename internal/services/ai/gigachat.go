@@ -19,11 +19,11 @@ type GigaChatService struct {
 	Dataset string
 }
 
-func (s *GigaChatService) SendRequest(text string) error {
+func (s *GigaChatService) SendRequest(text string) (models.GigChatResp, error) {
 
 	requestBody := models.GigChatReq{
 		Model: s.Model,
-		Mes: []models.Messages{
+		Mes: []models.Message{
 			{Role: "system", Content: s.Dataset},
 			{Role: s.Role, Content: text},
 		},
@@ -33,12 +33,12 @@ func (s *GigaChatService) SendRequest(text string) error {
 
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
-		return fmt.Errorf("error marshaling JSON: %w", err)
+		return models.GigChatResp{}, fmt.Errorf("error marshaling JSON: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", s.BaseURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
+		return models.GigChatResp{}, fmt.Errorf("error creating request: %w", err)
 
 	}
 
@@ -48,14 +48,14 @@ func (s *GigaChatService) SendRequest(text string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error sending request: %w", err)
+		return models.GigChatResp{}, fmt.Errorf("error sending request: %w", err)
 
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error reading response: %w", err)
+		return models.GigChatResp{}, fmt.Errorf("error reading response: %w", err)
 
 	}
 
@@ -63,9 +63,10 @@ func (s *GigaChatService) SendRequest(text string) error {
 	var jsonResp models.GigChatResp
 	err = json.Unmarshal(body, &jsonResp)
 	if err != nil {
-		return fmt.Errorf("error Marshal JSON: %w", err)
+		return models.GigChatResp{}, fmt.Errorf("error Unmarshal JSON: %w", err)
 	}
-	fmt.Println(jsonResp.Choices)
-	return nil
+	fmt.Println(jsonResp.Choices[0].Message.Content)
+
+	return jsonResp, nil
 
 }

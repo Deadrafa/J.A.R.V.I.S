@@ -1,13 +1,13 @@
 package models
 
 type GigChatReq struct {
-	Model       string     `json:"model"`
-	Mes         []Messages `json:"messages"`
-	Temperature int        `json:"temperature"`
-	Stream      bool       `json:"stream"`
+	Model       string    `json:"model"`
+	Mes         []Message `json:"messages"`
+	Temperature int       `json:"temperature"`
+	Stream      bool      `json:"stream"`
 }
 
-type Messages struct {
+type Message struct {
 	Content string `json:"content"`
 	Role    string `json:"role"`
 }
@@ -18,10 +18,7 @@ type GigChatResp struct {
 	Created int    `json:"created"`
 	Model   string `json:"model"`
 	Choices []struct {
-		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"message"`
+		Message      `json:"message"`
 		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
 	Usage struct {

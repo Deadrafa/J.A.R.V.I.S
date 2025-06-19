@@ -9,3 +9,4 @@ gigachat_token: "ZTIxNzM3NDktZjAxOC00YWQyLWJiOWEtNzc0Mjc4YmY1MzBlOmNiMzc5YTAxLTg
 bearer: "secret123"
 model: "GigaChat"
 role: "user"
+calendar_url: "http://127.0.0.1:8080"

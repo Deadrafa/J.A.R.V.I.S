@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/config"
+	"github.com/Deadrafa/J.A.R.V.I.S/internal/controllers/event"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/handlers"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/ai"
 	"github.com/Deadrafa/J.A.R.V.I.S/internal/services/ai/instructions"
@@ -33,6 +34,7 @@ func main() {
 	}
 	downloader := &audio.TelegramAudioDownloader{Bot: bot}
 	recognizer := &audio.SpeechRecognitionService{}
+	controller := &event.EventRouter{CalendarServiceURL: cfg.CalendarServiceURL}
 	gigaService := &ai.GigaChatService{
 		BaseURL: cfg.GigaChatURL,
 		Token:   cfg.GigaChatToken,
@@ -47,6 +49,7 @@ func main() {
 		Downloader:  downloader,
 		Recognizer:  recognizer,
 		GigaService: *gigaService,
+		EventRouter: *controller,
 	}
 
 	fmt.Println("Бот запущен")
